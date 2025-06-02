@@ -1,25 +1,27 @@
-package com.custompool.rejection;
+package com.rejection;
 
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
 
-public class CustomRejectionPolicies {
-    public static class AbortPolicy implements RejectedExecutionHandler {
-        @Override
-        public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-            throw new RejectedExecutionException("Task " + r.toString() + " rejected from " + executor);
+public enum TaskRejectionPolicy {
+    TERMINATE {
+        public void handle(Runnable task, ThreadPoolExecutor pool) {
+            throw new RejectedExecutionException("Task " + task + " rejected");
         }
-    }
-
-    public static class CallerRunsPolicy implements RejectedExecutionHandler {
-        @Override
-        public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-            if (!executor.isShutdown()) {
-                System.out.println("[Rejected] Executing task " + r + " in caller thread");
-                r.run();
-            }
+    },
+    EXECUTE_CALLER {
+        public void handle(Runnable task, ThreadPoolExecutor pool) {
+            System.out.println("[Overload] Executing in calling thread: " + task);
+            task.run();
         }
-    }
+    },
+    DISCARD {
+        public void handle(Runnable task, ThreadPoolExecutor pool) {
+            // Silent discard
+        }
+    };
+    
+    public abstract void handle(Runnable task, ThreadPoolExecutor pool);
+}
 
     public static class DiscardPolicy implements RejectedExecutionHandler {
         @Override

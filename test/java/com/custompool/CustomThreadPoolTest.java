@@ -1,22 +1,18 @@
-package com.custompool;
+package com.test;
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-import java.util.concurrent.*;
+import org.junit.jupiter.api.*;
+import com.threadpool.*;
+import com.threadfactory.*;
 
-public class CustomThreadPoolTest {
+class ThreadPoolTest {
     @Test
-    public void testPoolInitialization() {
-        CustomThreadPoolExecutor executor = new CustomThreadPoolExecutor(
-                2, 4, 5, TimeUnit.SECONDS,
-                5, 1,
-                new CustomRejectionPolicies.AbortPolicy(),
-                new CustomThreadFactory("TestPool")
+    void testInitialization() {
+        DynamicThreadPool pool = new DynamicThreadPool(
+            2, 4, 1, TimeUnit.SECONDS,
+            5, 1, TaskRejectionPolicy.TERMINATE,
+            new DynamicThreadCreator("TestPool")
         );
-
-        assertNotNull(executor);
-        assertEquals(2, executor.getCurrentPoolSize());
+        
+        Assertions.assertEquals(2, pool.getCurrentWorkerCount());
     }
-
-    // Дополнительные тесты
 }
